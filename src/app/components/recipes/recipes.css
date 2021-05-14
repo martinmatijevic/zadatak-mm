@@ -1,0 +1,33 @@
+.recipeNameInput,
+.recipeNameButton {
+  align-self: center;
+}
+
+.recipeCard {
+  margin: 10px;
+  background-color: #dfa670 !important;
+}
+
+h5 {
+  font-weight: bold !important;
+  font-style: italic;
+}
+
+.recipeFooter {
+  text-align: center;
+}
+
+@media screen and (max-width: 500px) {
+  .favoriteList {
+    display: none;
+  }
+}
+
+span{
+  font-size: 135% !important;
+  font-weight: bold !important;
+}
+
+li{
+  font-style: italic;
+}
