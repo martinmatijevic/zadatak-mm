@@ -17,7 +17,7 @@ export class Logout extends React.Component {
       <>
         {this.props.username && (
           <>
-            <h4>Pozdrav {this.props.username.length > 15 ? this.props.username.substring(0, 15) + "...!" : this.props.username + "!"}</h4>
+            <h4>Pozdrav, {this.props.username.length > 15 ? this.props.username.substring(0, 15) + "...!" : this.props.username + "!"}</h4>
             <Button color="danger" size="sm" onClick={this.handleLogoutClick}>
               Odjava
             </Button>

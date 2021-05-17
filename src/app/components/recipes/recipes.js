@@ -3,7 +3,6 @@ import "./recipes.css";
 import { Recipes } from "../../data/recipes.js";
 import { AiOutlineStar } from "react-icons/ai";
 import { AiFillStar } from "react-icons/ai";
-import { FiEdit } from "react-icons/fi";
 import { BsFillTrashFill } from "react-icons/bs";
 import { FaWindowClose } from "react-icons/fa";
 import { v4 as uuidv4 } from "uuid";
@@ -29,21 +28,51 @@ import {
 } from "reactstrap";
 
 let buttonGreen = false;
+let buttonGreenEdit = false;
 
 const App = () => {
   const [RecipeList, setList] = React.useState(Recipes);
-  const [title, setName] = React.useState("");
+
+  const [name, setName] = React.useState("");
+  const [title, setTitle] = React.useState("");
+  const [description, setDescription] = React.useState("");
+  const [preparing, setPreparing] = React.useState("");
+  const [ingridients, setIngridients] = React.useState("");
 
   const [modal, setModal] = React.useState(false);
+  const [modalEdit, setModalEdit] = React.useState(false);
   const [modalRecipe, setModalRecipe] = React.useState(undefined);
+  const [modalRecipeEdit, setModalRecipeEdit] = React.useState(undefined);
 
   const toggle = (recipe) => {
     setModalRecipe(recipe);
     setModal(!modal);
+    if (modalEdit) {
+      setModalEdit(!modalEdit);
+      setModal(!modal);
+    } else setModal(!modal);
+  };
+
+  const toggleEdit = (recipe) => {
+    setTitle(recipe.title);
+    setDescription(recipe.description);
+    setPreparing(recipe.preparing);
+    setIngridients(recipe.ingridients);
+    setModalRecipeEdit(recipe);
+    if (modal) {
+      setModal(!modal);
+      setModalEdit(!modalEdit);
+    } else setModalEdit(!modalEdit);
   };
 
   const closeBtn = (
     <Button color="danger" onClick={toggle}>
+      <FaWindowClose />
+    </Button>
+  );
+
+  const closeBtnEdit = (
+    <Button color="danger" onClick={toggleEdit}>
       <FaWindowClose />
     </Button>
   );
@@ -53,9 +82,29 @@ const App = () => {
     setList(newList);
   }
 
-  /*function handleEdit(recipe) {
-  
-  }*/
+  function handleEdit(event) {
+    const newList = RecipeList.map((recipe) => {
+      if (recipe.id === modalRecipeEdit.id) {
+        const updatedItem = {
+          ...recipe,
+          title: title,
+          description: description,
+          preparing: preparing,
+          ingridients: ingridients,
+        };
+        return updatedItem;
+      }
+      return recipe;
+    });
+    setList(newList);
+    setTitle("");
+    setDescription("");
+    setPreparing("");
+    setIngridients("");
+    buttonGreenEdit = false;
+    event.preventDefault();
+    setModalEdit(!modalEdit);
+  }
 
   function handleFavorite(id) {
     const newList = RecipeList.map((recipe) => {
@@ -64,24 +113,40 @@ const App = () => {
           ...recipe,
           favourite: !recipe.favourite,
         };
-        if (modalRecipe?.id===id) modalRecipe.favourite=!modalRecipe.favourite;
-        return updatedItem;        
+        if (modalRecipe?.id === id) modalRecipe.favourite = !modalRecipe.favourite;
+        return updatedItem;
       }
       return recipe;
     });
     setList(newList);
   }
 
-  function handleChange(event) {
+  function handleChangeNew(event) {
     setName(event.target.value);
     event.target.value ? (buttonGreen = true) : (buttonGreen = false);
   }
+  function handleChangeTitle(event) {
+    setTitle(event.target.value);
+    buttonGreenEdit = true;
+  }
+  function handleChangeDescription(event) {
+    setDescription(event.target.value);
+    buttonGreenEdit = true;
+  }
+  function handleChangePreparing(event) {
+    setPreparing(event.target.value);
+    buttonGreenEdit = true;
+  }
+  function handleChangeIngridients(event) {
+    setIngridients(event.target.value);
+    buttonGreenEdit = true;
+  }
 
   function handleAdd(event) {
-    if (title) {
+    if (name) {
       const newList = RecipeList.concat({
         id: uuidv4(),
-        title,
+        title: name,
         description: "",
         preparing: "",
         ingridients: "",
@@ -104,7 +169,7 @@ const App = () => {
                 Ime novog recepta:
               </Label>
               <Col sm="5" className="recipeNameInput">
-                <Input type="text" id="recipeName" value={title} onChange={handleChange} />
+                <Input type="text" id="recipeName" value={name} onChange={handleChangeNew} />
               </Col>
               <Col className="recipeNameButton">{!buttonGreen ? <Button>Dodaj</Button> : <Button color="success">Dodaj</Button>}</Col>
             </FormGroup>
@@ -176,13 +241,39 @@ const App = () => {
             <Row>Priprema: {modalRecipe.preparing}</Row>
           </ModalBody>
           <ModalFooter>
-            <Button>
-              <FiEdit />
-            </Button>
-            <Button color="success" onClick={() => toggle(modalRecipe)}>
+            <Button onClick={() => toggleEdit(modalRecipe)}>Uredi</Button>
+            <Button color="primary" onClick={() => toggle(modalRecipe)}>
               Povratak
             </Button>
           </ModalFooter>
+        </Modal>
+      )}
+      {modalRecipeEdit && (
+        <Modal isOpen={modalEdit} toggle={() => toggleEdit(modalRecipeEdit)}>
+          <Form onSubmit={handleEdit}>
+            <ModalHeader toggle={() => toggleEdit(modalRecipeEdit)} close={closeBtnEdit}>
+              <Input type="input" value={title} onChange={handleChangeTitle}></Input>
+            </ModalHeader>
+            <ModalBody>
+              <Row>
+                Opis: <Input type="textarea" value={description} onChange={handleChangeDescription}></Input>
+              </Row>
+              <hr></hr>
+              <Row>
+                Sastojci: <Input type="textarea" value={ingridients} onChange={handleChangeIngridients}></Input>
+              </Row>
+              <hr></hr>
+              <Row>
+                Priprema: <Input type="textarea" value={preparing} onChange={handleChangePreparing}></Input>
+              </Row>
+            </ModalBody>
+            <ModalFooter>
+              {!buttonGreenEdit ? <Button>Spremi</Button> : <Button color="success">Spremi</Button>}
+              <Button color="primary" onClick={() => toggle(modalRecipeEdit)}>
+                Povratak
+              </Button>
+            </ModalFooter>
+          </Form>
         </Modal>
       )}
     </Container>
